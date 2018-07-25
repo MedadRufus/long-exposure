@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# Modified by Medad Newman on 24 July 2018
+
 
 import argparse
 import cv2
@@ -6,7 +8,6 @@ import sys
 
 
 class ProgressBar(object):
-
     def __init__(self, total, prefix='Progress:', suffix='Complete', decimals=2, bar_length=50):
         """
         It is used to show a progress bar.
@@ -40,15 +41,17 @@ class ProgressBar(object):
 
 
 class LongExposure(object):
-
     @staticmethod
-    def run(video, output, step=1):
+    def run(video, output,n_frames, step=1, start_frame= 0):
         """
         The function used to run the long-exposure effect based on the video.
         :param video: the path to the video file
         :param output: the path to the output image file
+        :param n_frames: the number of frames to merge into a single frame
         :param step: the step used to ignore some frames (optional)
+        :param start_frame: The initial frame from which merging starts
         """
+
 
         # Initialize the RGB channel averages
         (r_avg, g_avg, b_avg) = (None, None, None)
@@ -63,8 +66,20 @@ class LongExposure(object):
 
         print("[INFO] Computing frame averages...")
 
+        # Set start frame
+        stream.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
+
         # Get the total number of frames to show the progress bar
         total_frames = int(stream.get(cv2.CAP_PROP_FRAME_COUNT))
+        print("Total frames:",total_frames)
+
+        # Get the frame rate
+        fps = stream.get(cv2.CAP_PROP_FPS)
+
+        print("Frame rate:",fps)
+
+        # Single frame exposure time:
+        print("Single frame exposure time:",1/fps, 'seconds')
 
         # Initialize the progress bar
         progress_bar = ProgressBar(total_frames)
@@ -79,7 +94,7 @@ class LongExposure(object):
             grabbed, frame = stream.read()
 
             # If the frame was not grabbed, then we have reached the end of the file
-            if not grabbed:
+            if not grabbed or frame_count > n_frames:
                 break
 
             if frame_count % step == 0:
@@ -121,13 +136,33 @@ class LongExposure(object):
         # Release the stream pointer
         stream.release()
 
+
 if __name__ == "__main__":
+    import datetime
+
     # Construct the argument parse and parse the arguments
-    ap = argparse.ArgumentParser()
-    ap.add_argument("-v", "--video", required=True, help="Path to input video file")
-    ap.add_argument("-o", "--output", required=True, help="Path to output 'long exposure' image")
-    ap.add_argument("-s", "--step", type=int, default=1, help="Step used to get the frames")
-    args = vars(ap.parse_args())
+    # ap = argparse.ArgumentParser()
+    # ap.add_argument("-v", "--video", required=True, help="Path to input video file")
+    # ap.add_argument("-o", "--output", required=True, help="Path to output 'long exposure' image")
+    # ap.add_argument("-s", "--step", type=int, default=1, help="Step used to get the frames")
+    # args = vars(ap.parse_args())
+
+    # current date time
+
+    # now = datetime.datetime.now()
+    # print(now.strftime("%Y-%m-%d %H-%M"))
+    import time
+
+    timestamp = time.strftime("%b %d %Y %H %M %S")
+
+    # Temporarily hard code the values to the code itself
+    # video = "C:/Users/medad/PycharmProjects/HAB/LongExposureSimulation/PICT0047.AVI"
+    video = "C:/Users/medad/Documents/University storage/High Altitude Ballooning/Gimbal construction/Youtube videos/gimbal footage stabilised.avi"
+
+    output = "output_images/output {0}.png".format(timestamp)
+    step = 1
+
+    args = {"video": video, "output": output, "step": step}
 
     # Run the long exposure algorithm passing the required parameters
-    LongExposure.run(args["video"], args["output"], args["step"])
+    LongExposure.run(args["video"], args["output"],n_frames=100, step= args["step"],start_frame=100)
