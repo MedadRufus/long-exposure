@@ -5,6 +5,7 @@
 import argparse
 import cv2
 import sys
+import matplotlib.pyplot as plt
 
 
 class ProgressBar(object):
@@ -52,7 +53,6 @@ class LongExposure(object):
         :param start_frame: The initial frame from which merging starts
         """
 
-
         # Initialize the RGB channel averages
         (r_avg, g_avg, b_avg) = (None, None, None)
 
@@ -70,7 +70,7 @@ class LongExposure(object):
         stream.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
 
         # Get the total number of frames to show the progress bar
-        total_frames = int(stream.get(cv2.CAP_PROP_FRAME_COUNT))
+        total_frames = int(stream.get(cv2.CAP_PROP_FRAME_COUNT))-start_frame
         print("Total frames:",total_frames)
 
         # Get the frame rate
@@ -129,7 +129,14 @@ class LongExposure(object):
             # Merge the RGB averages together and write the output image to disk
             # Here, we need to convert the value to uint8 to create the new image
             avg = cv2.merge([b_avg, g_avg, r_avg]).astype("uint8")
+
+
             cv2.imwrite(output, avg)
+            plt.imshow(cv2.cvtColor(avg,cv2.COLOR_RGB2BGR))
+            plt.title("Number of frames: "+str(n_frames))
+            plt.suptitle("Exposure time:"+str(n_frames*1/fps)+" seconds")
+            plt.show()
+
         else:
             print("[ERRO] No frames found...")
 
@@ -155,14 +162,19 @@ if __name__ == "__main__":
 
     timestamp = time.strftime("%b %d %Y %H %M %S")
 
+    #######################################################
     # Temporarily hard code the values to the code itself
-    # video = "C:/Users/medad/PycharmProjects/HAB/LongExposureSimulation/PICT0047.AVI"
-    video = "C:/Users/medad/Documents/University storage/High Altitude Ballooning/Gimbal construction/Youtube videos/gimbal footage stabilised.avi"
+    # Path for source video
+    video = "E:/DCIM/100DSCIM/PICT0045.AVI"
+    # video = "C:/Users/medad/Documents/University storage/High Altitude Ballooning/Gimbal construction/Youtube videos/gimbal footage.avi"
 
+    # Path for output image
     output = "output_images/output {0}.png".format(timestamp)
     step = 1
 
     args = {"video": video, "output": output, "step": step}
+    #######################################################
+
 
     # Run the long exposure algorithm passing the required parameters
-    LongExposure.run(args["video"], args["output"],n_frames=100, step= args["step"],start_frame=100)
+    LongExposure.run(args["video"], args["output"],n_frames=8, step= args["step"],start_frame=30)
