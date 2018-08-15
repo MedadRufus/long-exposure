@@ -1,12 +1,19 @@
 #!/usr/bin/env python
 # Modified by Medad Newman on 24 July 2018
+"""
+This code take a video and averages the frames of a video to simulate the long exposure. currently, the input and output paths
+are hard coded
+
+"""
 
 
 import argparse
 import cv2
 import sys
 import matplotlib.pyplot as plt
+import time
 
+timestamp = time.strftime("%b %d %Y %H %M %S")
 
 class ProgressBar(object):
     def __init__(self, total, prefix='Progress:', suffix='Complete', decimals=2, bar_length=50):
@@ -134,8 +141,10 @@ class LongExposure(object):
             cv2.imwrite(output, avg)
             plt.imshow(cv2.cvtColor(avg,cv2.COLOR_RGB2BGR))
             plt.title("Number of frames: "+str(n_frames))
-            plt.suptitle("Exposure time:"+str(n_frames*1/fps)+" seconds")
+            plt.suptitle("Exposure time:"+str(n_frames*1/fps)+" seconds\n"+"The start frame is frame {0} and end frame is frame {1}".format(start_frame,start_frame+n_frames))
+            plt.savefig("figures/output figure {0}.png".format(timestamp))
             plt.show()
+
 
         else:
             print("[ERRO] No frames found...")
@@ -158,14 +167,12 @@ if __name__ == "__main__":
 
     # now = datetime.datetime.now()
     # print(now.strftime("%Y-%m-%d %H-%M"))
-    import time
 
-    timestamp = time.strftime("%b %d %Y %H %M %S")
 
     #######################################################
     # Temporarily hard code the values to the code itself
     # Path for source video
-    video = "E:/DCIM/100DSCIM/PICT0045.AVI"
+    video = "E:/DCIM/105___01/MVI_1116.MOV"
     # video = "C:/Users/medad/Documents/University storage/High Altitude Ballooning/Gimbal construction/Youtube videos/gimbal footage.avi"
 
     # Path for output image
@@ -177,4 +184,4 @@ if __name__ == "__main__":
 
 
     # Run the long exposure algorithm passing the required parameters
-    LongExposure.run(args["video"], args["output"],n_frames=8, step= args["step"],start_frame=30)
+    LongExposure.run(args["video"], args["output"],n_frames=24*3, step= args["step"],start_frame=100)
