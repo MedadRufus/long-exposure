@@ -142,7 +142,7 @@ class LongExposure(object):
             plt.imshow(cv2.cvtColor(avg,cv2.COLOR_RGB2BGR))
             plt.title("Number of frames: "+str(n_frames))
             plt.suptitle("Exposure time:"+str(n_frames*1/fps)+" seconds\n"+"The start frame is frame {0} and end frame is frame {1}".format(start_frame,start_frame+n_frames))
-            plt.savefig("figures/output figure {0}.png".format(timestamp))
+            plt.savefig("Output images with labels/output figure {0}.png".format(timestamp))
             plt.show()
 
 
